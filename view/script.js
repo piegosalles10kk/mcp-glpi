@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://172.16.50.19:2500/api";
+// view/script.js
 
 // Verificar autenticação ao carregar página
 document.addEventListener('DOMContentLoaded', () => {
@@ -584,15 +584,12 @@ if (formCargo) {
     formCargo.onsubmit = async (e) => {
         e.preventDefault();
         
-        // Captura de competências (mantendo sua lógica original)
         const selected = Array.from(document.querySelectorAll('input[name="comp"]:checked'))
                               .map(cb => Number(cb.value));
         
-        // Montagem do payload com os novos campos
         const data = {
             nome: document.getElementById('cargo-nome').value,
             descricao: document.getElementById('cargo-desc').value,
-            // Capturando os novos IDs
             chamadosMaximos: Number(document.getElementById('cargo-max').value) || 0,
             chamadosMaximosEvasao: Number(document.getElementById('cargo-max-evasao').value) || 0,
             competencias: selected
@@ -607,7 +604,7 @@ if (formCargo) {
 
             if (res.ok) {
                 closeModal('modal-cargo');
-                formCargo.reset(); // Limpa os campos após sucesso
+                formCargo.reset();
                 loadCargos();
                 loadDashboardData();
             } else {
@@ -634,7 +631,6 @@ window.openEditCargoModal = async (id) => {
         document.getElementById('edit-cargo-nome').value = cargo.nome;
         document.getElementById('edit-cargo-desc').value = cargo.descricao || '';
         
-        // Preenchendo os novos campos no modal de edição
         document.getElementById('edit-cargo-max').value = cargo.chamadosMaximos || 0;
         document.getElementById('edit-cargo-max-evasao').value = cargo.chamadosMaximosEvasao || 0;
 
@@ -654,7 +650,6 @@ window.openEditCargoModal = async (id) => {
 };
 
 const formEditCargo = document.getElementById('form-edit-cargo');
-// Localize o formEditCargo.onsubmit no seu script.js e atualize o payload:
 if (formEditCargo) {
     formEditCargo.onsubmit = async (e) => {
         e.preventDefault();
@@ -664,7 +659,6 @@ if (formEditCargo) {
         const payload = {
             nome: document.getElementById('edit-cargo-nome').value,
             descricao: document.getElementById('edit-cargo-desc').value,
-            // Certifique-se que estes IDs batem com o HTML acima
             chamadosMaximos: Number(document.getElementById('edit-cargo-max').value) || 0,
             chamadosMaximosEvasao: Number(document.getElementById('edit-cargo-max-evasao').value) || 0,
             competencias: selected
@@ -698,7 +692,6 @@ async function loadGlpiData() {
     const tbody = document.getElementById('table-glpi-body');
     tbody.innerHTML = '<tr class="loading-row"><td colspan="4" class="text-center">Consultando GLPI...</td></tr>';
     try {
-        // Buscar técnicos do GLPI e usuários já cadastrados
         const [resGlpi, resLocal] = await Promise.all([
             fetch(`${API_BASE_URL}/glpi/tecnicos`),
             fetch(`${API_BASE_URL}/users`)
@@ -707,10 +700,8 @@ async function loadGlpiData() {
         const tecsGlpi = await resGlpi.json();
         const usersLocal = await resLocal.json();
         
-        // Criar Set com IDs dos usuários já cadastrados
         const cadastradosIds = new Set(usersLocal.map(u => u._id));
         
-        // Filtrar apenas técnicos não cadastrados
         const tecsNaoCadastrados = tecsGlpi.filter(t => !cadastradosIds.has(t.id));
         
         if (tecsNaoCadastrados.length === 0) {
@@ -777,7 +768,7 @@ if (formUser) {
             if(res.ok) {
                 closeModal('modal-user');
                 loadUsers();
-                loadGlpiData(); // Recarregar lista de técnicos disponíveis
+                loadGlpiData();
                 loadDashboardData();
             } else {
                 const errorData = await res.json();

@@ -1,0 +1,95 @@
+version: '3.8'
+
+services:
+  # Serviço MongoDB
+  mongodb:
+    image: mongo:7.0
+    container_name: mcp-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: mcp_admin_2026
+      MONGO_INITDB_DATABASE: MCP
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+      - ./docker/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - mcp-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # Serviço da Aplicação
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mcp-app
+    restart: unless-stopped
+    ports:
+      - "2500:2500"
+    environment:
+      # MongoDB Connection
+      MONGO_URI: mongodb://mcp_user:mcp_pass_2026@mongodb:27017/MCP?authSource=MCP
+      
+      # Server Configuration
+      PORT: 2500
+      NODE_ENV: production
+    volumes:
+      - ./view:/app/view
+      - app_logs:/app/logs
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - mcp-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:2500"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Serviço Mongo Express (Interface Web para MongoDB - Opcional)
+  mongo-express:
+    image: mongo-express:1.0.2
+    container_name: mcp-mongo-express
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
+      ME_CONFIG_MONGODB_ADMINPASSWORD: mcp_admin_2026
+      ME_CONFIG_MONGODB_URL: mongodb://admin:mcp_admin_2026@mongodb:27017/
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: admin
+      ME_CONFIG_MONGODB_SERVER: mongodb
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - mcp-network
+
+# Volumes persistentes
+volumes:
+  mongodb_data:
+    driver: local
+    name: mcp_mongodb_data
+  mongodb_config:
+    driver: local
+    name: mcp_mongodb_config
+  app_logs:
+    driver: local
+    name: mcp_app_logs
+
+# Rede interna
+networks:
+  mcp-network:
+    driver: bridge
+    name: mcp-network

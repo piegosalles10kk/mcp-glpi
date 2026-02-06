@@ -45,7 +45,7 @@ print('✅ Índices criados com sucesso');
 // Inserir admin padrão
 db.admins.insertOne({
   username: 'admin',
-  password: '94d1224de6aa8c641f5238fe7e5e1326f8f78e9b3de9ebadac9c25d52aea2124', // Bug*0000 em SHA-256
+  password: 'db5209f1ee023e9465af060e44fbe1893d525741766db016102fefade7f4d5b2', // Bug*0000 em SHA-256
   nome: 'Administrador',
   role: 'admin',
   createdAt: new Date(),

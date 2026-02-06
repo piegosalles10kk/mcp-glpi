@@ -1,5 +1,5 @@
 // src/controllers/authController.js
-const { Admin } = require('../models/admin');
+const  Admin  = require('../models/admin'); // ← ALTERAÇÃO AQUI
 const crypto = require('crypto');
 
 // Função para criar hash de senha
@@ -26,6 +26,7 @@ exports.initializeAdmin = async (req, res) => {
             res.status(200).json({ message: "Admin já existe" });
         }
     } catch (error) {
+        console.error('❌ Erro ao inicializar admin:', error);
         res.status(500).json({ error: error.message });
     }
 };
@@ -35,6 +36,8 @@ exports.login = async (req, res) => {
     try {
         const { username, password } = req.body;
         
+        console.log('🔐 Tentativa de login:', { username });
+        
         if (!username || !password) {
             return res.status(400).json({ message: "Username e senha são obrigatórios" });
         }
@@ -42,14 +45,20 @@ exports.login = async (req, res) => {
         const admin = await Admin.findOne({ username });
         
         if (!admin) {
+            console.log('❌ Admin não encontrado:', username);
             return res.status(401).json({ message: "Credenciais inválidas" });
         }
 
+
         const hashedPassword = hashPassword(password);
         
+        
         if (admin.password !== hashedPassword) {
+            console.log('❌ Senha incorreta');
             return res.status(401).json({ message: "Credenciais inválidas" });
         }
+
+        console.log('✅ Login bem-sucedido!');
 
         // Criar sessão (armazenar no localStorage do cliente)
         const sessionToken = crypto.randomBytes(32).toString('hex');
@@ -64,6 +73,7 @@ exports.login = async (req, res) => {
             }
         });
     } catch (error) {
+        console.error('❌ Erro no login:', error);
         res.status(500).json({ error: error.message });
     }
 };
@@ -102,6 +112,7 @@ exports.changePassword = async (req, res) => {
         
         res.status(200).json({ message: "Senha alterada com sucesso" });
     } catch (error) {
+        console.error('❌ Erro ao alterar senha:', error);
         res.status(500).json({ error: error.message });
     }
 };

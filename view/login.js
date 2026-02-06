@@ -1,5 +1,4 @@
 // view/login.js
-const API_BASE_URL = "http://172.16.50.19:2500/api";
 
 document.addEventListener('DOMContentLoaded', () => {
     // Verificar se já está logado
@@ -46,6 +45,8 @@ async function handleLogin(e) {
     errorMessage.style.display = 'none';
     
     try {
+        console.log('🔗 Tentando conectar em:', API_BASE_URL + '/auth/login');
+        
         const response = await fetch(`${API_BASE_URL}/auth/login`, {
             method: 'POST',
             headers: {
@@ -61,6 +62,8 @@ async function handleLogin(e) {
             localStorage.setItem('mcp_token', data.token);
             localStorage.setItem('mcp_user', JSON.stringify(data.user));
             
+            console.log('✅ Login realizado com sucesso!');
+            
             // Redirecionar para dashboard
             window.location.href = '/index.html';
         } else {
@@ -68,7 +71,7 @@ async function handleLogin(e) {
         }
     } catch (error) {
         console.error('Erro no login:', error);
-        showError('Erro ao conectar com o servidor');
+        showError('Erro ao conectar com o servidor. Verifique se o backend está rodando.');
     } finally {
         btnLogin.disabled = false;
         btnLogin.innerHTML = '<i class="bi bi-box-arrow-in-right"></i> Entrar';

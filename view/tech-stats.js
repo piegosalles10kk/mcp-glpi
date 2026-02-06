@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://172.16.50.19:2500/api";
+// view/tech-stats.js
 
 let queueChart, categoriesChart;
 let statsData = null;

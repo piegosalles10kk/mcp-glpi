@@ -1,12 +1,12 @@
-const API_BASE_URL = "http://172.16.50.19:2500/api";
+// view/kanban.js
 
 let techniciansList = [];
 let dashboardConfig = null;
 let glpiBaseUrl = '';
 let autoRefreshInterval = null;
-let matrizPrioridades = []; // NOVO: Armazena matriz de prioridades das entidades
+let matrizPrioridades = [];
 
-// Constantes para cálculo de prioridade (baseado nos exemplos)
+// Constantes para cálculo de prioridade
 const TEMPO_URG_PRIO_5 = 10; // minutos
 const TEMPO_URG_PRIO_4 = 30; // minutos
 
@@ -57,7 +57,7 @@ async function loadDashboardConfig() {
         dashboardConfig = await response.json();
         if (dashboardConfig.glpi_url) glpiBaseUrl = dashboardConfig.glpi_url.replace('/apirest.php', '');
         await loadAllTechnicians();
-        await loadMatrizPrioridades(); // NOVO: Carregar matriz de prioridades
+        await loadMatrizPrioridades();
         await renderDashboard();
     } catch (error) {
         console.error('Erro ao carregar configuração:', error);
@@ -73,7 +73,6 @@ async function loadAllTechnicians() {
     }
 }
 
-// NOVO: Carregar matriz de prioridades das entidades
 async function loadMatrizPrioridades() {
     try {
         const response = await fetch(`${API_BASE_URL}/entidades-config`);
@@ -195,9 +194,6 @@ async function loadTechnicianData(card, technician) {
 
 // --- ALGORITMO DE PRIORIZAÇÃO DE TICKETS ---
 
-/**
- * Busca a prioridade configurada para a entidade do ticket
- */
 function obterPrioridadeEntidade(nomeEntidade) {
     if (!nomeEntidade || !matrizPrioridades || matrizPrioridades.length === 0) {
         return 0;
@@ -207,24 +203,15 @@ function obterPrioridadeEntidade(nomeEntidade) {
     return entidadeConfig ? entidadeConfig.prioridade : 0;
 }
 
-/**
- * Calcula o nível de prioridade efetivo do ticket
- * Considera: prioridade da entidade E urgência do ticket
- */
 function calcularNivelPrioridade(ticket) {
     const prioridadeEntidade = obterPrioridadeEntidade(ticket.entity);
     const urgenciaTicket = ticket.priority || 0;
     
-    // Retorna o MÁXIMO entre prioridade da entidade e urgência do ticket
     const nivelFinal = Math.max(prioridadeEntidade, urgenciaTicket);
     
     return nivelFinal;
 }
 
-/**
- * Verifica se o ticket está atrasado com base em sua prioridade/urgência
- * Retorna informações sobre o atraso
- */
 function verificarAtraso(ticket) {
     if (!ticket.date) return { atrasado: false, diffMinutos: 0, tipo: null };
     
@@ -244,14 +231,8 @@ function verificarAtraso(ticket) {
     return { atrasado: false, diffMinutos, tipo: null };
 }
 
-/**
- * Ordena os tickets por prioridade (usando o algoritmo de fila)
- * 1. Maior prioridade primeiro (max entre prioridade da entidade e urgência do ticket)
- * 2. Em caso de empate, tickets mais antigos primeiro
- */
 function ordenarTicketsPorPrioridade(tickets) {
     return tickets.sort((a, b) => {
-        // 1. Ordenar por nível de prioridade (maior primeiro)
         const nivelA = calcularNivelPrioridade(a);
         const nivelB = calcularNivelPrioridade(b);
         
@@ -259,7 +240,6 @@ function ordenarTicketsPorPrioridade(tickets) {
             return nivelB - nivelA;
         }
         
-        // 2. Em caso de empate, ordenar por data de abertura (mais antigo primeiro)
         const dataA = new Date(a.date || 0);
         const dataB = new Date(b.date || 0);
         
@@ -277,19 +257,15 @@ async function renderNewTicketsSection() {
         const response = await fetch(`${API_BASE_URL}/tickets/new`);
         const data = await response.json();
         
-        // Processar tickets para adicionar informações de urgência
         let tickets = data.tickets || [];
         
-        // Adicionar campo urgencia_num baseado no priority (para compatibilidade)
         tickets = tickets.map(ticket => ({
             ...ticket,
             urgencia_num: ticket.priority || 0
         }));
         
-        // Ordenar tickets usando o algoritmo de prioridade
         const ticketsOrdenados = ordenarTicketsPorPrioridade(tickets);
         
-        // Log para debug - DETALHADO
         console.log(`\n📋 ========== PRIORIZAÇÃO DE TICKETS ==========`);
         console.log(`Total de tickets novos: ${ticketsOrdenados.length}`);
         console.log(`Matriz de prioridades carregada: ${matrizPrioridades.length} entidades\n`);
@@ -330,18 +306,15 @@ function createTicketCard(ticket) {
     const categoryLabel = ticket.category || 'Geral';
     const cleanPreview = stripHtml(ticket.preview || 'Sem descrição');
     
-    // Verificar se está atrasado
     const infoAtraso = verificarAtraso(ticket);
     const nivelFinal = calcularNivelPrioridade(ticket);
     const prioridadeEntidade = obterPrioridadeEntidade(ticket.entity);
     
-    // Adicionar badge de atraso se aplicável
     let badgeAtraso = '';
     if (infoAtraso.atrasado) {
         badgeAtraso = `<span class="ticket-delay-badge ${infoAtraso.tipo.toLowerCase()}">${infoAtraso.tipo}</span>`;
     }
     
-    // Adicionar informação da entidade se tiver prioridade configurada
     let infoEntidade = '';
     if (prioridadeEntidade > 0) {
         const estrelas = '⭐'.repeat(prioridadeEntidade);
@@ -402,10 +375,6 @@ function openTicketInGlpi(id) {
     window.open(`${glpiBaseUrl}/front/ticket.form.php?id=${id}`, '_blank'); 
 }
 
-/**
- * Nova Função: Abre a lista filtrada no GLPI
- * Status 3 = Planejado | Status 4 = Pendente
- */
 function openGlpiFilteredList(tecnico, statusId) {
     const encodedName = encodeURIComponent(tecnico);
     const url = `${glpiBaseUrl}/front/ticket.php?is_deleted=0&as_map=0&browse=0` +
