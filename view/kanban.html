@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Kanban - MCP BugBusters</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="additional-styles.css">
+    <link rel="stylesheet" href="kanban-styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Background Effects -->
+    <div class="bg-effects">
+        <div class="grain-overlay"></div>
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-content">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="bi bi-bug-fill"></i>
+                    </div>
+                    <div class="logo-text">
+                        <h2>BugBusters</h2>
+                        <span class="logo-subtitle">MCP Dashboard</span>
+                    </div>
+                </div>
+                
+                <nav class="nav-menu">
+                    <ul>
+                        <li class="nav-item active">
+                            <div class="nav-item-content">
+                                <i class="bi bi-kanban"></i>
+                                <span>Dashboard Kanban</span>
+                            </div>
+                            <div class="nav-item-indicator"></div>
+                        </li>
+                        <li class="nav-item" onclick="window.location.href='/index.html'">
+                            <div class="nav-item-content">
+                                <i class="bi bi-arrow-left"></i>
+                                <span>Voltar ao Dashboard</span>
+                            </div>
+                        </li>
+                    </ul>
+                    
+                    <div class="nav-footer">
+                        <button class="btn-logout" id="btn-logout">
+                            <i class="bi bi-box-arrow-right"></i>
+                            <span>Sair</span>
+                        </button>
+                    </div>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="top-header">
+                <div class="header-left">
+                    <h1 class="page-title">Dashboard de Atendimento</h1>
+                    <p class="tech-subtitle">Visão em tempo real dos chamados e técnicos</p>
+                </div>
+                <div class="user-profile">
+                    <button class="btn btn-primary" onclick="refreshDashboard()" style="margin-right: 1rem;">
+                        <i class="bi bi-arrow-clockwise"></i>
+                        <span>Atualizar</span>
+                    </button>
+                    <span class="admin-badge">Admin</span>
+                    <div class="avatar">
+                        <i class="bi bi-person-circle"></i>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Technicians Summary -->
+            <section class="technicians-summary">
+                <div id="technicians-container" class="technicians-grid">
+                    <!-- Loading Placeholder -->
+                    <div class="loading-placeholder">Carregando técnicos...</div>
+                </div>
+            </section>
+
+            <!-- New Tickets Section -->
+            <section class="tickets-section">
+                <div class="section-header-kanban">
+                    <h2>
+                        <i class="bi bi-inbox"></i>
+                        Chamados Novos
+                    </h2>
+                    <span class="tickets-count-badge" id="new-tickets-count">0</span>
+                </div>
+                <div id="new-tickets-container" class="tickets-grid">
+                    <!-- Loading Placeholder -->
+                    <div class="loading-placeholder">Carregando tickets novos...</div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal: Adicionar Técnico ao Dashboard -->
+    <div id="modal-add-tech-dashboard" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Adicionar Técnico ao Dashboard</h2>
+                <button class="modal-close" onclick="closeModal('modal-add-tech-dashboard')">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Selecione o Técnico</label>
+                    <select id="select-technician" class="form-control" style="width: 100%; padding: var(--space-4);">
+                        <option value="">Carregando técnicos...</option>
+                    </select>
+                </div>
+                
+                <button class="btn btn-primary w-full" onclick="addTechnicianToDashboard()">
+                    <i class="bi bi-plus-circle"></i>
+                    <span>Adicionar</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="kanban.js"></script>
+</body>
+</html>

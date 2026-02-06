@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estatísticas do Técnico - MCP BugBusters</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="additional-styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Background Effects -->
+    <div class="bg-effects">
+        <div class="grain-overlay"></div>
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-content">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="bi bi-bug-fill"></i>
+                    </div>
+                    <div class="logo-text">
+                        <h2>BugBusters</h2>
+                        <span class="logo-subtitle">MCP Dashboard</span>
+                    </div>
+                </div>
+                
+                <nav class="nav-menu">
+                    <ul>
+                        <li class="nav-item" onclick="window.location.href='/index.html'">
+                            <div class="nav-item-content">
+                                <i class="bi bi-arrow-left"></i>
+                                <span>Voltar ao Dashboard</span>
+                            </div>
+                        </li>
+                    </ul>
+                    
+                    <div class="nav-footer">
+                        <button class="btn-logout" id="btn-logout">
+                            <i class="bi bi-box-arrow-right"></i>
+                            <span>Sair</span>
+                        </button>
+                    </div>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="top-header">
+                <div class="header-left">
+                    <h1 class="page-title" id="tech-name">Carregando...</h1>
+                    <p class="tech-subtitle" id="tech-subtitle"></p>
+                </div>
+                <div class="user-profile">
+                    <span class="admin-badge">Admin</span>
+                    <div class="avatar">
+                        <i class="bi bi-person-circle"></i>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Loading State -->
+            <div id="loading-state" class="loading-state">
+                <div class="spinner"></div>
+                <p>Carregando estatísticas do técnico...</p>
+            </div>
+
+            <!-- Stats Content -->
+            <div id="stats-content" style="display: none;">
+                
+                <!-- Grid com Gráfico de Pizza e Contador -->
+                <div class="charts-grid">
+                    <!-- Tickets na Fila -->
+                    <section class="stats-section">
+                        <h2 class="section-title">
+                            <i class="bi bi-clipboard-check"></i>
+                            Tickets na Fila
+                        </h2>
+                        <div class="chart-container">
+                            <canvas id="queueChart"></canvas>
+                        </div>
+                    </section>
+
+                    <!-- Tickets Finalizados -->
+                    <section class="stats-section">
+                        <h2 class="section-title">
+                            <i class="bi bi-check-circle"></i>
+                            Tickets Finalizados
+                        </h2>
+                        <div class="period-selector">
+                            <button class="period-btn active" data-period="month">Últimos 30 Dias</button>
+                            <button class="period-btn" data-period="quarter">Últimos 90 Dias</button>
+                            <button class="period-btn" data-period="year">Últimos 365 Dias</button>
+                        </div>
+                        <div class="count-display">
+                            <div class="count-number" id="finalized-count">0</div>
+                            <div class="count-label">Chamados Finalizados</div>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Top 5 Categorias -->
+                <section class="stats-section">
+                    <h2 class="section-title">
+                        <i class="bi bi-bar-chart"></i>
+                        Top 5 Categorias Mais Atendidas
+                    </h2>
+                    <p style="color: var(--neutral-500); margin-bottom: var(--space-4); font-size: 0.9375rem;">
+                        Baseado nos tickets finalizados por este técnico
+                    </p>
+                    <div class="chart-container" style="max-width: 100%; height: 400px;">
+                        <canvas id="categoriesChart"></canvas>
+                    </div>
+                </section>
+
+                <!-- Insights Adicionais -->
+                <section class="stats-section">
+                    <h2 class="section-title">
+                        <i class="bi bi-lightbulb"></i>
+                        Insights de Performance
+                    </h2>
+                    <div class="insights-grid">
+                        <div class="insight-card">
+                            <i class="bi bi-clock-history"></i>
+                            <div>
+                                <h4>Taxa de Resolução</h4>
+                                <p id="resolution-rate">Calculando...</p>
+                            </div>
+                        </div>
+                        <div class="insight-card">
+                            <i class="bi bi-trophy"></i>
+                            <div>
+                                <h4>Categoria Dominante</h4>
+                                <p id="dominant-category">Calculando...</p>
+                            </div>
+                        </div>
+                        <div class="insight-card">
+                            <i class="bi bi-graph-up-arrow"></i>
+                            <div>
+                                <h4>Produtividade (Dias uteis)</h4>
+                                <p id="productivity">Calculando...</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script src="tech-stats.js"></script>
+</body>
+</html>
