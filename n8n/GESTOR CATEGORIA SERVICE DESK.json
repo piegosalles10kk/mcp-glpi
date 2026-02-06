@@ -1,0 +1,902 @@
+{
+  "name": "GESTOR CATEGORIA SERVICE DESK",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "79278579-09b6-40ec-86f8-b68b17ea87a9",
+              "name": "urlAPI",
+              "value": "https://chamados.bugbusters.me",
+              "type": "string"
+            },
+            {
+              "id": "464c3fad-9884-4e1d-a06c-8b8191f87cef",
+              "name": "APP_TOKEN_GLPI",
+              "value": "rNkCgKqtRIfBmY2mVi3zXOhPSXvkYPGSDh4sIuPe",
+              "type": "string"
+            },
+            {
+              "id": "7de97a6f-adb5-4e40-8929-d42bd07e3dc2",
+              "name": "Login_GLPI",
+              "value": "diego.teixeira",
+              "type": "string"
+            },
+            {
+              "id": "eb39c8c0-c2dd-420b-b2a5-c7a05fe326cd",
+              "name": "Senha_GLPI",
+              "value": "Diego1310",
+              "type": "string"
+            },
+            {
+              "id": "e0d16930-6cf2-45e9-a8d9-594f5aef173b",
+              "name": "Status",
+              "value": "={{ $json.Status || '10' }}",
+              "type": "string"
+            },
+            {
+              "id": "e3d6fcca-d8bb-4716-91f9-9b9121318f01",
+              "name": "NomeDaInstanciaEvolution",
+              "value": "BUGBOT",
+              "type": "string"
+            },
+            {
+              "id": "77d8f442-a301-4770-a660-325d1e036eda",
+              "name": "linkEvolution",
+              "value": "http://172.16.50.19:8081",
+              "type": "string"
+            },
+            {
+              "id": "65037bb9-4699-4ec5-8204-bc9c64d43dc0",
+              "name": "APIKeyEvolution",
+              "value": "429683C4C977415CAAFCCE10F7D57E11",
+              "type": "string"
+            },
+            {
+              "id": "93529e55-6ac9-4065-a4ac-319020d08456",
+              "name": "urlMCP",
+              "value": "http://172.16.50.19:2500/api",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -4528,
+        240
+      ],
+      "id": "518f21d5-d74c-499f-b1f1-a3db306d40a0",
+      "name": "Autenticação"
+    },
+    {
+      "parameters": {
+        "url": "={{ $node['HTTP Request'].json['glpi_url'] }}/search/Ticket?range=0-9999&withindexes=true&giveItems=true&forcedisplay[0]=1&forcedisplay[1]=2&forcedisplay[2]=7&forcedisplay[3]=15&forcedisplay[4]=80&forcedisplay[5]=5&forcedisplay[6]=3&forcedisplay[7]=21&criteria[0][field]=23&criteria[0][searchtype]=equals&criteria[0][value]=0&criteria[1][link]=AND&criteria[1][field]=12&criteria[1][searchtype]=equals&criteria[1][value]={{ $json.statusToSearch }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "App-Token",
+              "value": "={{ $('Autenticação2').first().json.APP_TOKEN_GLPI }}"
+            },
+            {
+              "name": "Session-Token",
+              "value": "={{ $('Auth (BugBusters)').first().json.session_token }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "f60a48ef-8ce6-413b-8556-3bba6ac6e5a8",
+      "name": "GLPI Search",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -2944,
+        208
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "statusToSearch",
+        "options": {}
+      },
+      "id": "edb439ab-4459-4c17-8464-bf72d1587bb8",
+      "name": "Organizador de status",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -3168,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "s-list",
+              "name": "statusToSearch",
+              "value": "={{ $('Autenticação').first().json.Status === '10' ? [1,2,3,4] : ($('Autenticação2').first().json.Status.toString().includes(',') ? $('Autenticação2').first().json.Status.split(',') : [$('Autenticação').first().json.Status]) }}",
+              "type": "array"
+            },
+            {
+              "id": "s-tok",
+              "name": "sessionToken",
+              "value": "={{ $json.session_token }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "11977fe7-d777-4533-aaac-354a579fe2ce",
+      "name": "Preparador de dados2",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -3408,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $node['HTTP Request'].json['glpi_url'] }}/initSession ",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "App-Token",
+              "value": "={{ $json.APP_TOKEN_GLPI }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"login\": \"{{ $json.Login_GLPI }}\",\n  \"password\": \"{{ $json.Senha_GLPI }}\"\n}",
+        "options": {}
+      },
+      "id": "57a2a48b-214e-454c-a20b-5e2d9a1b465c",
+      "name": "Auth (BugBusters)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -3632,
+        224
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2338c700-67e0-4d6a-8a32-b04545f1d515",
+              "name": "URLAUXILIAR",
+              "value": "={{ $node['HTTP Request'].json['glpi_url'] }}",
+              "type": "string"
+            },
+            {
+              "id": "st",
+              "name": "Status",
+              "value": "={{ $json.Status || '10' }}",
+              "type": "string"
+            },
+            {
+              "id": "log",
+              "name": "Login_GLPI",
+              "value": "={{ $node['HTTP Request'].json['glpi_user_login'] }}",
+              "type": "string"
+            },
+            {
+              "id": "pwd",
+              "name": "Senha_GLPI",
+              "value": "={{ $node['HTTP Request'].json['glpi_user_password'] }}",
+              "type": "string"
+            },
+            {
+              "id": "tok",
+              "name": "APP_TOKEN_GLPI",
+              "value": "={{ $node['HTTP Request'].json['glpi_app_token'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "afc75d5b-0001-4527-a1fb-203c575e2759",
+      "name": "Autenticação2",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -3872,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Criamos objetos vazios para acumular os dados de todas as execuções\nlet allData = {};\nlet allDataHtml = {};\nlet totalCountGeral = 0;\n\n// O segredo está aqui: percorrer TODOS os itens que entraram no nó\nfor (const item of $input.all()) {\n  const payload = item.json;\n  totalCountGeral += parseInt(payload.totalcount || 0);\n  if (payload.data) {\n    Object.assign(allData, payload.data);\n  }\n  if (payload.data_html) {\n    Object.assign(allDataHtml, payload.data_html);\n  }\n}\n\nreturn {\n  totalcount: totalCountGeral,\n  data: allData,\n  data_html: allDataHtml\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2672,
+        192
+      ],
+      "id": "24d88fc0-551b-4d03-9acd-bb0f7f55fded",
+      "name": "Iterador de todos os status de chamado"
+    },
+    {
+      "parameters": {
+        "jsCode": "let allTickets = [];\nlet totalCount = 0;\n\nconst statusInput = $(\"Autenticação2\").first().json.Status;\nconst tipoDeChamado = parseInt(statusInput);\n\nconst superClean = (html) => {\n  if (!html || typeof html !== 'string') return \"\";\n  return html\n    .replace(/<style[^>]*>[\\s\\S]*?<\\/style>/gi, '')\n    .replace(/<script[^>]*>[\\s\\S]*?<\\/script>/gi, '')\n    .replace(/<[^>]*>?/gm, '')\n    .replace(/&nbsp;/g, ' ')\n    .replace(/&quot;/g, '\"')\n    .replace(/&lt;/g, '<')\n    .replace(/&gt;/g, '>')\n    .replace(/&amp;/g, '&')\n    .replace(/&#\\d+;/g, (match) => String.fromCharCode(match.match(/\\d+/)[0]))\n    .replace(/\\s+/g, ' ')\n    .trim();\n};\n\nconst extractUserInfo = (html) => {\n  if (!html) return { nome: '', email: '', telefone: '' };\n  const nomeMatch = html.match(/^([^<]+)/);\n  const emailMatch = html.match(/mailto:([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})/);\n  const telMatch = html.match(/tel:([^\"'>\\s]+)/);\n  return {\n    nome: nomeMatch ? nomeMatch[1].trim() : '',\n    email: emailMatch ? emailMatch[1] : '',\n    telefone: telMatch ? telMatch[1] : ''\n  };\n};\n\nfor (const item of $input.all()) {\n  const payload = item.json;\n  let source = payload.data?.[0]?.data ? payload.data[0] : (payload.data?.data ? payload.data : payload);\n\n  if (source && source.data) {\n    const ticketsData = source.data;\n    const ticketsHtml = source.data_html || {};\n\n    Object.keys(ticketsData).forEach(ticketId => {\n      if (!isNaN(ticketId)) {\n        const ticket = ticketsData[ticketId];\n        const ticketHtml = ticketsHtml[ticketId] || {};\n        \n        // Categoria\n        const catRaw = superClean(ticketHtml[7] || ticket[7] || \"Sem Categoria\");\n        \n        // COMENTADO: Agora permite \"aberto por e-mail\" e outras categorias sujas\n        // const categoriasExcluir = [\"sem categoria\", \"aberto por e-mail\", \"null\"];\n        // if (categoriasExcluir.includes(catRaw.toLowerCase()) || catRaw === \"\" || catRaw === null) return;\n\n        // Extração do Conteúdo (Campo 21)\n        const rawContent = ticketHtml[21] || ticket[21] || \"\";\n        const reqInfo = extractUserInfo(ticketHtml[4] || \"\");\n\n        let ticketObj = {\n          id: ticket[2],\n          requerente_nome: reqInfo.nome,\n          requerente_email: reqInfo.email,\n          requerente_tel: reqInfo.telefone,\n          titulo: superClean(ticket[1]),\n          categoria: catRaw,\n          urgencia: ticket[3] || 0,\n          descricao_inicial: superClean(rawContent), // Conteúdo limpo aqui\n          status_name: superClean(ticketHtml[12] || `Status ${ticket[12]}`),\n          data_abertura: ticket[15],\n          entidade: ticket[80]\n        };\n\n        if (tipoDeChamado !== 1) {\n          const tecInfo = extractUserInfo(ticketHtml[5] || \"\");\n          ticketObj.tecnicoAtribuido = tecInfo.nome || \"Não atribuído\";\n        } else {\n          ticketObj.tecnicoAtribuido = \"Não atribuído\";\n        }\n\n        allTickets.push(ticketObj);\n      }\n    });\n  }\n}\n\ntotalCount = allTickets.length;\n\nreturn {\n  tipoDeChamado,\n  total_tickets_found: totalCount,\n  all_tickets: allTickets\n};"
+      },
+      "id": "96a7df03-3f10-430a-89c7-4ff7f54721ca",
+      "name": "Formatador dos chamados",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2480,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "Chamados",
+        "options": {}
+      },
+      "id": "8b258a61-1e1f-4e40-aad1-2adaaadc04ef",
+      "name": "Organizador de chamados",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $node['HTTP Request'].json['glpi_url'] }}/initSession ",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "App-Token",
+              "value": "={{ $('Autenticação').first().json.APP_TOKEN_GLPI }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"login\": \"{{ $('Autenticação').first().json.Login_GLPI }}\",\n  \"password\": \"{{ $('Autenticação').first().json.Senha_GLPI }}\"\n}",
+        "options": {}
+      },
+      "id": "5f85a321-1d01-4483-a4e7-1a853139ffdd",
+      "name": "Auth (BugBusters)1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -656,
+        176
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "s-tok",
+              "name": "sessionToken",
+              "value": "={{ $json.session_token }}",
+              "type": "string"
+            },
+            {
+              "id": "cace7f87-f152-4e81-9ccd-96b879cf72d1",
+              "name": "Chamados",
+              "value": "={{ $('Editar chamados').item.json.output.novosGeral }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "de6526fc-42ac-4a6b-9c95-56fa0b89402e",
+      "name": "Preparador de dados",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -432,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputTickets = $(\"Formatador dos chamados\").first().json;\nconst listaDeTickets = inputTickets.all_tickets || [];\n\nconst apenasSujos = listaDeTickets.filter(c => {\n  const tecnicoValido = c.tecnicoAtribuido === \"Não atribuído\";\n  \n  // Normaliza a categoria para comparação\n  const categoria = (c.categoria || \"\").toLowerCase();\n  \n  // Define os termos de busca para o filtro\n  const termosSujos = [\"aberto por e-mail\", \"sem categoria\", \"null\"];\n  \n  // Verifica se a categoria é um dos termos ou se está vazia\n  const eSujo = termosSujos.some(termo => categoria.includes(termo)) || categoria.trim() === \"\";\n\n  return tecnicoValido && eSujo;\n});\n\nconst resultadoFinal = apenasSujos.map(chamado => {\n  return {\n    ...chamado,\n    urgencia_num: parseInt(chamado.urgencia) || 0\n  };\n});\n\nreturn {\n  totalNovos: resultadoFinal.length,\n  novosGeral: resultadoFinal\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2256,
+        192
+      ],
+      "id": "98ab5357-f8e3-492a-9124-3cb421418992",
+      "name": "Retorna chamados sujos"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "4fc5668c-1469-4f2d-8943-55b10b3be0c3",
+              "leftValue": "={{ $json.totalNovos }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -2048,
+        192
+      ],
+      "id": "f7b4e61f-4701-465a-b798-9333f80f6e1a",
+      "name": "If"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -1776,
+        400
+      ],
+      "id": "89067f75-c7a3-4d2b-a547-fc07e1332087",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "url": "={{ $node['HTTP Request'].json['glpi_url'] }}/ITILCategory?range=0-999&is_recursive=true",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "range",
+              "value": "0-999"
+            },
+            {
+              "name": "is_recursive",
+              "value": "1"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "App-Token",
+              "value": "={{ $('Autenticação').first().json.APP_TOKEN_GLPI }}"
+            },
+            {
+              "name": "Session-Token",
+              "value": "={{ $node['Preparador de dados2'].json ['sessionToken'] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "734cf58c-6249-45ae-b41a-72e63b196188",
+      "name": "GLPI ITILCategory1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1776,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "Faça o procedimento",
+        "options": {
+          "systemMessage": "=Contexto: Você é um Analista de Suporte de TI nível 1, especialista em frameworks ITIL. Sua tarefa é normalizar chamados de Service Desk.\n\nEntradas:\n\nBanco de Dados de Categorias: {{ JSON.stringify($node['Todas as categorias'].json['result']) }}\n\nLista de Chamados: {{ JSON.stringify($node['Retorna chamados sujos'].json['novosGeral']) }}\n\nSua Missão: Para cada chamado na lista:\n\nAnalise o \"titulo\" e a \"descricao_inicial\".\n\nIdentifique a categoria correspondente no \"Banco de Dados de Categorias\". Se houver menção a \"TOKEN\" ou \"VCARD\", utilize \"Desenvolvimento Infiniti > V-Card\".\n\nSubstitua o campo \"categoria\" pelo nome exato e adicione o campo \"categoria_id\" com o ID respectivo.\n\nAdicione o campo \"urgencia\" com um valor inteiro de 1 a 5, seguindo a lógica ITIL:\n\n5 (Muito Alta): Sistemas críticos fora do ar, interrupção total da operação ou múltiplos usuários afetados.\n\n4 (Alta): Erros graves em funcionalidades importantes, mas com contorno difícil.\n\n3 (Média): Problemas de desempenho ou bugs que não impedem o trabalho principal.\n\n2 (Baixa): Solicitações de rotina, dúvidas ou ajustes estéticos.\n\n1 (Muito Baixa): Sugestões ou informações gerais.\n\nRegras Cruciais de Saída:\n\nO retorno deve ser estritamente um JSON válido.\n\nNÃO use blocos de código Markdown (json ... ).\n\nNÃO inclua explicações, introduções ou conclusões.\n\nNÃO utilize quebras de linha (\\n) ou espaços desnecessários. O JSON deve ser compacto e contínuo em uma única linha.\n\nMantenha todos os outros campos originais intactos.\n\nFormato Exigido: {\"totalNovos\":0,\"novosGeral\":[]}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -1264,
+        176
+      ],
+      "id": "70619970-dbc0-41fd-bae2-afb29175d0df",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pegamos todos os itens que entraram no nó\nconst itens = $input.all();\nlet textoFinal = \"\";\n\nfor (let i = 0; i < itens.length; i++) {\n  // No n8n, os dados de cada item ficam dentro de .json\n  const categoria = itens[i].json;\n  const testeTipo = categoria.is_incident\n  let tipo\n  if(testeTipo === 1){\n    tipo = \"incidente\"\n  }else{\n    tipo = \"requisição\"\n  }\n  \n  const idCategoria = categoria.id;\n  const nomeCategoria = categoria.completename; \n  \n  textoFinal += `id: ${idCategoria} nome: ${nomeCategoria} tipo de chamado: ${tipo} ${(i < itens.length - 1 ? \"\\n\" : \"\")}`\n}\n\n// Retornamos o total e a lista formatada\nreturn { \n  total: itens.length,\n  result: textoFinal \n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1520,
+        176
+      ],
+      "id": "1bcb17bf-3a3f-4b1f-957e-6149d338034c",
+      "name": "Todas as categorias"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -1264,
+        368
+      ],
+      "id": "c7bc271d-4ea4-4a0c-b623-9189f32166a3",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "b7HeNF7cJOsd85Kq",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "88fc36b4-d918-43eb-8873-adc078aee3ff",
+              "name": "output",
+              "value": "={{ $json.output }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -880,
+        176
+      ],
+      "id": "fcbceec2-2064-44b9-9249-333bbcad4f94",
+      "name": "Editar chamados"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ $node['HTTP Request'].json['glpi_url'] }}/Ticket/{{ $json.id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "App-Token",
+              "value": "={{ $('Autenticação').first().json.APP_TOKEN_GLPI }}"
+            },
+            {
+              "name": "Session-Token",
+              "value": "={{ $('Preparador de dados').first().json.sessionToken }}"
+            },
+            {
+              "name": "Set-ID-Entity",
+              "value": "0"
+            },
+            {
+              "name": "Is-Recursive",
+              "value": "true"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"input\": {\n    \"id\": {{ $json.id }},\n    \"itilcategories_id\": {{ $json.categoria_id }}\n  }\n}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "e9f66131-421e-4f08-9279-49d47705236b",
+      "name": "Atualizar chamado",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -16,
+        160
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.urlMCP }}/config/glpi",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -4320,
+        240
+      ],
+      "id": "1a74ba87-4d3d-495a-99c5-46e407b28868",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "1fbccdf0-0922-4b7b-89e1-fa9bc64537e7",
+              "leftValue": "={{ $json.automacaoCategoria }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -4112,
+        240
+      ],
+      "id": "de57fb96-5649-4723-abb6-4cc2b7481ef6",
+      "name": "If1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -3872,
+        416
+      ],
+      "id": "64ed799a-76d2-4f15-bd4e-6b358eee1f66",
+      "name": "No Operation, do nothing1"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -4752,
+        240
+      ],
+      "id": "1b79a07a-ca3b-4b72-951d-719bd74a840a",
+      "name": "Schedule Trigger"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Autenticação": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Autenticação2": {
+      "main": [
+        [
+          {
+            "node": "Auth (BugBusters)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Auth (BugBusters)": {
+      "main": [
+        [
+          {
+            "node": "Preparador de dados2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparador de dados2": {
+      "main": [
+        [
+          {
+            "node": "Organizador de status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Organizador de status": {
+      "main": [
+        [
+          {
+            "node": "GLPI Search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GLPI Search": {
+      "main": [
+        [
+          {
+            "node": "Iterador de todos os status de chamado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Iterador de todos os status de chamado": {
+      "main": [
+        [
+          {
+            "node": "Formatador dos chamados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatador dos chamados": {
+      "main": [
+        [
+          {
+            "node": "Retorna chamados sujos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Organizador de chamados": {
+      "main": [
+        [
+          {
+            "node": "Atualizar chamado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Auth (BugBusters)1": {
+      "main": [
+        [
+          {
+            "node": "Preparador de dados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparador de dados": {
+      "main": [
+        [
+          {
+            "node": "Organizador de chamados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retorna chamados sujos": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "GLPI ITILCategory1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GLPI ITILCategory1": {
+      "main": [
+        [
+          {
+            "node": "Todas as categorias",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Todas as categorias": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Editar chamados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Editar chamados": {
+      "main": [
+        [
+          {
+            "node": "Auth (BugBusters)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualizar chamado": {
+      "main": [
+        []
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Autenticação2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Autenticação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "8cd5e477-a1ae-4fd7-b563-f08f3f41fe7e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ffbfdf3ce47a1842904b0b0985b8b2ed9db91162ebc2fde867186855e3669ffe"
+  },
+  "id": "zXF0ueHIyyYpIzAe",
+  "tags": []
+}

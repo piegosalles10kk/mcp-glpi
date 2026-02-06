@@ -1,5 +1,5 @@
 // src/controllers/authController.js
-const  Admin  = require('../models/admin'); // ← ALTERAÇÃO AQUI
+const  Admin  = require('../models/admin');
 const crypto = require('crypto');
 
 // Função para criar hash de senha
